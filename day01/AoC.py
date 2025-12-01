@@ -30,12 +30,10 @@ def part1(f: List[Tuple[str, int]]) -> int:
 
 def part2(f: List[Tuple[str, int]]) -> int:
     position = 50
-    print(f"The dial starts at position {position}")
     count = 0
     for direction, angle in f:
         position, passes = rotate(angle, direction, position)
         count += passes
-        print(f"Turn {direction}{angle} to position {position} ({passes} full passes)")
     return count
 
 
