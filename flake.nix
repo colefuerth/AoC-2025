@@ -93,9 +93,8 @@
             cp -r template/* day$day_num
             echo "Created day$day_num with AoC.py, input.txt, and test.txt"
           '';
-        in {
-          inherit dayPackages new-day;
-        }
+        in
+        { inherit new-day; } // dayPackages
       );
     };
 }
