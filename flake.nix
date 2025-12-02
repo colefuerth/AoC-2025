@@ -91,6 +91,7 @@
             day_num=$(printf "%02d" $day_num)
             mkdir day$day_num
             cp -r template/* day$day_num
+            git add day$day_num
             echo "Created day$day_num with AoC.py, input.txt, and test.txt"
           '';
         in
