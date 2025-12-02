@@ -5,7 +5,6 @@ from typing import List, Tuple
 from copy import deepcopy
 from math import log10
 from concurrent.futures import ProcessPoolExecutor
-from itertools import repeat
 
 
 def is_valid(n: int, splits: int = 2) -> bool:
