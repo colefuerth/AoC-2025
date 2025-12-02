@@ -38,8 +38,9 @@ def _process_range_part2(range_tuple: Tuple[int, int]) -> int:
     l, r = range_tuple
     valid = []
     for n in range(l, r + 1):
-        for x in range(2, int(log10(n)) + 2):
-            if (int(log10(n)) + 1) % x == 0 and is_valid(n, splits=x):
+        scale = int(log10(n))
+        for x in range(2, scale + 2):
+            if (scale + 1) % x == 0 and is_valid(n, splits=x):
                 valid.append(n)
                 break
     return sum(valid)
