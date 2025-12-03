@@ -3,8 +3,6 @@
 import sys
 from typing import List
 from copy import deepcopy
-from concurrent.futures import ProcessPoolExecutor
-from functools import partial
 
 
 def process_bank(bank: List[int], num_batteries: int) -> int:
@@ -13,10 +11,7 @@ def process_bank(bank: List[int], num_batteries: int) -> int:
 
 
 def solve(f: List[List[int]], num_batteries: int) -> int:
-    with ProcessPoolExecutor() as executor:
-        results = executor.map(
-            partial(process_bank, num_batteries=num_batteries), f)
-    return sum(results)
+    return sum(process_bank(bank, num_batteries) for bank in f)
 
 
 def part1(f: List[List[int]]) -> int:
