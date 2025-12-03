@@ -3,27 +3,25 @@
 import sys
 from typing import List
 from copy import deepcopy
-from itertools import combinations
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 
+
 def process_bank(bank: List[int], num_batteries: int) -> int:
-    m = 0
-    for positions in combinations(range(len(bank)), num_batteries):
-            positions = sorted(positions, reverse=True)
-            num = 0
-            for i in range(len(positions)):
-                num += bank[positions[i]] * (10 ** i)
-            m = max(m, num)
-    return m
+    i = max(range(len(bank) - num_batteries + 1), key=lambda x: bank[x])
+    return ((bank[i] * (10 ** (num_batteries - 1))) + process_bank(bank[i+1:], num_batteries - 1)) if num_batteries > 1 else bank[i]
+
 
 def solve(f: List[List[int]], num_batteries: int) -> int:
     with ProcessPoolExecutor() as executor:
-        results = executor.map(partial(process_bank, num_batteries=num_batteries), f)
+        results = executor.map(
+            partial(process_bank, num_batteries=num_batteries), f)
     return sum(results)
+
 
 def part1(f: List[List[int]]) -> int:
     return solve(f, 2)
+
 
 def part2(f: List[List[int]]) -> int:
     return solve(f, 12)
