@@ -9,7 +9,7 @@ ADJ = list(product([-1, 0, 1], repeat=2))
 ADJ.remove((0, 0))
 
 
-def is_valid(x: int, y: int, grid: List[List[str]]) -> bool:
+def is_valid(x: int, y: int, grid: List[str]) -> bool:
     return 0 <= x < len(grid) and 0 <= y < len(grid[0])
 
 
