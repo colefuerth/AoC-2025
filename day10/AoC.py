@@ -3,7 +3,6 @@
 import sys
 from typing import List
 from copy import deepcopy
-from pprint import pprint
 from itertools import combinations
 import numpy as np
 from scipy.optimize import milp, LinearConstraint, Bounds
