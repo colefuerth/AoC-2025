@@ -62,6 +62,12 @@
             hasAoCPy
           ) (builtins.attrNames allEntries);
 
+          # Python with packages
+          pythonWithPackages = pkgs.python3.withPackages (ps: with ps; [
+            numpy
+            scipy
+          ]);
+
           # Create a package for each day
           makeDayPackage =
             day:
@@ -70,10 +76,10 @@
             in
             {
               python = pkgs.writeShellScriptBin day ''
-                exec ${pkgs.python3}/bin/python3 "${dayPath}/AoC.py" "${dayPath}/input.txt"
+                exec ${pythonWithPackages}/bin/python3 "${dayPath}/AoC.py" "${dayPath}/input.txt"
               '';
               python-test = pkgs.writeShellScriptBin day ''
-                exec ${pkgs.python3}/bin/python3 "${dayPath}/AoC.py" "${dayPath}/test.txt"
+                exec ${pythonWithPackages}/bin/python3 "${dayPath}/AoC.py" "${dayPath}/test.txt"
               '';
             };
 
