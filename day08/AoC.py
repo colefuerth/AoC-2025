@@ -33,18 +33,14 @@ def part1(f: List[Tuple[int, ...]]) -> int:
         combinations(f, 2), key=lambda pair: dist(*pair)
     )
 
-    NUMBER_OF_CONNECTIONS = 10
+    NUMBER_OF_PAIRS_TO_TRY = 1000
     connections: DefaultDict[Tuple[int, ...],
                        List[Tuple[int, ...]]] = defaultdict(list)
-    for a, b in distances:
-        if len(list(chain(*connections.values()))) // 2 >= NUMBER_OF_CONNECTIONS:
-            break
-        # if b in get_circuit(a, connections):
-        #     continue
-        print(f"{(len(list(chain(*connections.values()))) // 2) + 1}: Connecting {a} to {b} with distance {dist(a, b)}")
+    for (a, b) in distances[:NUMBER_OF_PAIRS_TO_TRY]:
+        if b in get_circuit(a, connections):
+            continue
         connections[a].append(b)
         connections[b].append(a)
-    pprint.pprint(connections)
 
     visited: Set[Tuple[int, ...]] = set()
     circuits: List[List[Tuple[int, ...]]] = []
@@ -53,16 +49,27 @@ def part1(f: List[Tuple[int, ...]]) -> int:
             continue
         circuits.append(get_circuit(point, connections))
         visited.update(circuits[-1])
-    print(f"Found {len(circuits)} circuits")
-    print([len(c) for c in sorted(circuits, key=len, reverse=True)])
-    # print the sorted list of circuits in a prettyprint
-    pprint.pprint(sorted(circuits, key=len, reverse=True))
-    pprint.pprint(connections)
     return prod(len(c) for c in sorted(circuits, key=len, reverse=True)[:3])
 
 
 def part2(f: List[Tuple[int, ...]]) -> int:
-    return 0
+    distances: List[Tuple[Tuple[int, ...], Tuple[int, ...]]] = sorted(
+        combinations(f, 2), key=lambda pair: dist(*pair)
+    )
+
+    connections: DefaultDict[Tuple[int, ...],
+                       List[Tuple[int, ...]]] = defaultdict(list)
+    last_connection = distances[0]
+    for (a, b) in distances:
+        circuit = get_circuit(a, connections)
+        if len(circuit) == len(f):
+            break
+        if b in get_circuit(a, connections):
+            continue
+        connections[a].append(b)
+        connections[b].append(a)
+        last_connection = (a, b)
+    return last_connection[0][0] * last_connection[1][0]
 
 
 if __name__ == "__main__":
