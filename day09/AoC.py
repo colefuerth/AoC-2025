@@ -10,7 +10,7 @@ def part1(f: List[Tuple[int, ...]]) -> int:
     return max(((abs(b[0]-a[0]) + 1) * (abs(b[1]-a[1]) + 1)) for a, b in combinations(f, 2))
 
 
-def draw_line(a: Tuple[int, int], b: Tuple[int, int]) -> List[List[int]]:
+def draw_line(a: Tuple[int, ...], b: Tuple[int, ...]) -> List[List[int]]:
     points = []
     if a[0] == b[0]:
         for y in range(min(a[1], b[1]), max(a[1], b[1]) + 1):
@@ -21,64 +21,72 @@ def draw_line(a: Tuple[int, int], b: Tuple[int, int]) -> List[List[int]]:
     return points
 
 
-def draw_grid(points: Iterable[Tuple[int, int]]) -> None:
-    min_x = min(p[0] for p in points) - 1
-    max_x = max(p[0] for p in points) + 1
-    min_y = min(p[1] for p in points) - 1
-    max_y = max(p[1] for p in points) + 1
-    grid = [["." for _ in range(min_x, max_x + 1)]
-            for _ in range(min_y, max_y + 1)]
-    for x, y in points:
-        grid[y - min_y][x - min_x] = "#"
-    for row in grid:
-        print("".join(row))
-
-
 def part2(f: List[Tuple[int, ...]]) -> int:
+    edges = [(a, b) for a, b in pairwise(f + [f[0]])]
     perimeter = set()
-    print("Calculating perimeter...")
-    for a, b in pairwise(f + [f[0]]):
+    for a, b in edges:
         line = draw_line(a, b)
         perimeter.update(tuple(p) for p in line)
-    perimeter = list(perimeter)
-    # start by filling in the area inside the perimeter
-    min_x, min_y, max_x, max_y = (
-        min(p[0] for p in perimeter),
-        min(p[1] for p in perimeter),
-        max(p[0] for p in perimeter),
-        max(p[1] for p in perimeter),
-    )
-    print(f"Perimeter bounds: x={min_x}..{max_x}, y={min_y}..{max_y}")
-    print(
-        f"Total simulated area size: {(max_x - min_x + 3) * (max_y - min_y + 3)}")
-    grid = {(x, y): (1 if (x, y) in perimeter else 0) for x, y in product(range(
-        min_x - 1, max_x + 2), range(min_y - 1, max_y + 2))}
-    print("Starting flood fill...")
-    # flood fill from outside the perimeter
-    stack = [(min_x - 1, min_y - 1), (max_x + 1, max_y + 1),
-             (min_x - 1, max_y + 1), (max_x + 1, min_y - 1)]
-    stack_iterations = 0
-    while stack:
-        stack_iterations += 1
-        print(
-            f"Flood fill iteration {stack_iterations}, stack size: {len(stack)}")
-        x, y = stack.pop()
-        if grid[(x, y)] == 0:
-            grid[(x, y)] = 1
-            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                nx, ny = x + dx, y + dy
-                if (nx, ny) in grid and grid[(nx, ny)] == 0:
-                    stack.append((nx, ny))
-    # now we can make a list of the points that are inside the perimeter
-    inside = [p for p, v in grid.items() if v == 0]
-    points = set(inside + perimeter)
-    # now, we can use the points to find the largest rectangular area where only points are inside
-    draw_grid(points)
-    rectangles = []
+
+    def point_in_polygon(x, y):
+        """Check if point (x,y) is inside or on the polygon using ray casting."""
+        if (x, y) in perimeter:
+            return True
+        inside = False
+        for (x1, y1), (x2, y2) in edges:
+            if ((y1 > y) != (y2 > y)) and \
+               (x < (x2 - x1) * (y - y1) / (y2 - y1) + x1):
+                inside = not inside
+        return inside
+
+    candidates = []
     for a, b in combinations(f, 2):
-        if all((x, y) in points for x, y in product(range(a[0], b[0] + 1), range(a[1], b[1] + 1))):
-            rectangles.append((abs(b[0]-a[0]) + 1) * (abs(b[1]-a[1]) + 1))
-    return max(rectangles)
+        min_x, max_x = min(a[0], b[0]), max(a[0], b[0])
+        min_y, max_y = min(a[1], b[1]), max(a[1], b[1])
+        area = (max_x - min_x + 1) * (max_y - min_y + 1)
+        candidates.append((area, min_x, max_x, min_y, max_y))
+    candidates.sort(reverse=True)
+
+    for idx, (area, min_x, max_x, min_y, max_y) in enumerate(candidates):
+        width, height = max_x - min_x + 1, max_y - min_y + 1
+        valid = True
+        if area > 10000:
+            # Sample corners, edges, and interior for large rectangles
+            sample_points = set()
+
+            # Corners
+            for cx, cy in [(min_x, min_y), (min_x, max_y), (max_x, min_y), (max_x, max_y)]:
+                sample_points.add((cx, cy))
+
+            # Edges
+            step = max(1, min(width, height) // 100)
+            for x in range(min_x, max_x + 1, step):
+                sample_points.add((x, min_y))
+                sample_points.add((x, max_y))
+            for y in range(min_y, max_y + 1, step):
+                sample_points.add((min_x, y))
+                sample_points.add((max_x, y))
+
+            # Interior sample
+            for x in range(min_x + 1, max_x, max(1, width // 20)):
+                for y in range(min_y + 1, max_y, max(1, height // 20)):
+                    sample_points.add((x, y))
+
+            valid = all(point_in_polygon(x, y) for x, y in sample_points)
+        else:
+            # Check all points for small rectangles
+            for x in range(min_x, max_x + 1):
+                for y in range(min_y, max_y + 1):
+                    if not point_in_polygon(x, y):
+                        valid = False
+                        break
+                if not valid:
+                    break
+
+        if valid:
+            return area
+
+    return 0
 
 
 if __name__ == "__main__":
