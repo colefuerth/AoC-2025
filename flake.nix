@@ -101,7 +101,7 @@
             echo "Created day$day_num with AoC.py, input.txt, and test.txt"
           '';
         in
-        { inherit new-day; } // dayPackages
+        { inherit new-day pythonWithPackages; } // dayPackages
       );
     };
 }
