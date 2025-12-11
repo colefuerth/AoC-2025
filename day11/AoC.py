@@ -5,6 +5,7 @@ from typing import List, Dict, Tuple
 from copy import deepcopy
 from functools import cache
 
+
 def part1(f: Dict[str, List[str]]) -> int:
     def traverse(cur: str, target: str) -> int:
         if cur == target:
@@ -27,7 +28,8 @@ def part2(f: Dict[str, List[str]]) -> int:
 if __name__ == "__main__":
     fname = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
     f = [l.strip() for l in open(fname, "r").readlines() if l.strip()]
-    circuit = {l.strip():[rr.strip() for rr in r.strip().split(" ")] for l, r in (line.split(":") for line in f)}
+    circuit = {l.strip(): [rr.strip() for rr in r.strip().split(" ")]
+               for l, r in (line.split(":") for line in f)}
 
     print("Part 1:", part1(deepcopy(circuit)))
     print("Part 2:", part2(deepcopy(circuit)))
