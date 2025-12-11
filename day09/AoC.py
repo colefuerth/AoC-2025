@@ -50,38 +50,23 @@ def part2(f: List[Tuple[int, ...]]) -> int:
     for idx, (area, min_x, max_x, min_y, max_y) in enumerate(candidates):
         width, height = max_x - min_x + 1, max_y - min_y + 1
         valid = True
-        if area > 10000:
-            # Sample corners, edges, and interior for large rectangles
-            sample_points = set()
+        # Sample corners and edges since checking all points is expensive, and it is a single perimeter so no holes in the middle
+        sample_points = set()
 
-            # Corners
-            for cx, cy in [(min_x, min_y), (min_x, max_y), (max_x, min_y), (max_x, max_y)]:
-                sample_points.add((cx, cy))
+        # Corners
+        for cx, cy in [(min_x, min_y), (min_x, max_y), (max_x, min_y), (max_x, max_y)]:
+            sample_points.add((cx, cy))
 
-            # Edges
-            step = max(1, min(width, height) // 100)
-            for x in range(min_x, max_x + 1, step):
-                sample_points.add((x, min_y))
-                sample_points.add((x, max_y))
-            for y in range(min_y, max_y + 1, step):
-                sample_points.add((min_x, y))
-                sample_points.add((max_x, y))
+        # Edges (sampled)
+        step = max(1, min(width, height) // 100)
+        for x in range(min_x, max_x + 1, step):
+            sample_points.add((x, min_y))
+            sample_points.add((x, max_y))
+        for y in range(min_y, max_y + 1, step):
+            sample_points.add((min_x, y))
+            sample_points.add((max_x, y))
 
-            # Interior sample
-            for x in range(min_x + 1, max_x, max(1, width // 20)):
-                for y in range(min_y + 1, max_y, max(1, height // 20)):
-                    sample_points.add((x, y))
-
-            valid = all(point_in_polygon(x, y) for x, y in sample_points)
-        else:
-            # Check all points for small rectangles
-            for x in range(min_x, max_x + 1):
-                for y in range(min_y, max_y + 1):
-                    if not point_in_polygon(x, y):
-                        valid = False
-                        break
-                if not valid:
-                    break
+        valid = all(point_in_polygon(x, y) for x, y in sample_points)
 
         if valid:
             return area
