@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 
 import sys
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from copy import deepcopy
-from pprint import pprint
-
+from functools import cache
 
 def part1(f: Dict[str, List[str]]) -> int:
     def traverse(cur: str, target: str) -> int:
@@ -15,14 +14,14 @@ def part1(f: Dict[str, List[str]]) -> int:
 
 
 def part2(f: Dict[str, List[str]]) -> int:
-    def traverse(cur: str, target: str, required_passes: List[str]) -> int:
+    @cache
+    def traverse(cur: str, target: str, required_passes: Tuple[str, ...]) -> int:
         if cur == target:
             return int(len(required_passes) == 0)
         if cur in required_passes:
-            required_passes = required_passes[:]
-            required_passes.remove(cur)
+            required_passes = tuple(rp for rp in required_passes if rp != cur)
         return sum(traverse(nxt, target, required_passes) for nxt in f[cur])
-    return traverse("svr", "out", ["fft", "dac"])
+    return traverse("svr", "out", ("fft", "dac"))
 
 
 if __name__ == "__main__":
